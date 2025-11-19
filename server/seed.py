@@ -1,19 +1,144 @@
-from flights.models import Airport, Airline, Flight, Fare, Coupon, CabinClass
+import random
 from datetime import datetime, timedelta
 
-bom = Airport.objects.get_or_create(code="BOM", defaults={"name":"Chhatrapati Shivaji","city":"Mumbai","country":"India"})[0]
-delh = Airport.objects.get_or_create(code="DEL", defaults={"name":"Indira Gandhi","city":"New Delhi","country":"India"})[0]
-ai = Airline.objects.get_or_create(code="AI", defaults={"name":"Air India"})[0]
+from flights.models import Airline, Airport, Flight, Fare, CabinClass, Coupon
 
-dep = datetime.now().replace(hour=15, minute=0, second=0, microsecond=0)
-arr = dep + timedelta(hours=2, minutes=10)
-f = Flight.objects.create(airline=ai, flight_number="AI-501", source=bom, destination=delh,
-                          departure_time=dep, arrival_time=arr, base_price=4500, aircraft="A320")
+print("\n🚀 Starting Database Seeding...\n")
 
-Fare.objects.bulk_create([
-    Fare(flight=f, cabin_class=CabinClass.ECONOMY, total_seats=120, seats_available=90, multiplier=1.00),
-    Fare(flight=f, cabin_class=CabinClass.BUSINESS, total_seats=16, seats_available=12, multiplier=2.5),
-])
+# ------------------------------
+# CLEAN OLD DATA
+# ------------------------------
+print("🧹 Cleaning old data...")
+Fare.objects.all().delete()
+Flight.objects.all().delete()
+Airport.objects.all().delete()
+Airline.objects.all().delete()
+Coupon.objects.all().delete()
+print("✔ Old data cleaned.\n")
 
-Coupon.objects.create(code="WELCOME10", description="10% off", discount_percent=10, active=True)
-print("Seeded!")
+# ------------------------------
+# AIRLINES
+# ------------------------------
+airline_list = [
+    ("AI", "Air India"),
+    ("6E", "IndiGo"),
+    ("UK", "Vistara"),
+    ("SG", "SpiceJet"),
+    ("G8", "Go First"),
+    ("QR", "Qatar Airways"),
+    ("EK", "Emirates"),
+    ("LH", "Lufthansa"),
+    ("SQ", "Singapore Airlines"),
+    ("EY", "Etihad")
+]
+
+airlines = []
+for code, name in airline_list:
+    airlines.append(Airline.objects.create(code=code, name=name))
+
+print(f"✔ {len(airlines)} airlines created.\n")
+
+# ------------------------------
+# AIRPORTS
+# ------------------------------
+airport_list = [
+    ("BOM", "Mumbai Intl", "Mumbai", "India"),
+    ("DEL", "Delhi Intl", "Delhi", "India"),
+    ("BLR", "Bangalore Intl", "Bangalore", "India"),
+    ("HYD", "Hyderabad Intl", "Hyderabad", "India"),
+    ("MAA", "Chennai Airport", "Chennai", "India"),
+    ("CCU", "Kolkata Airport", "Kolkata", "India"),
+    ("DXB", "Dubai Intl", "Dubai", "UAE"),
+    ("DOH", "Doha Intl", "Doha", "Qatar"),
+    ("SIN", "Changi Airport", "Singapore", "Singapore"),
+    ("FRA", "Frankfurt Intl", "Frankfurt", "Germany"),
+    ("LHR", "London Heathrow", "London", "UK"),
+    ("JFK", "New York JFK", "New York", "USA"),
+    ("HND", "Tokyo Haneda", "Tokyo", "Japan"),
+    ("SYD", "Sydney Airport", "Sydney", "Australia"),
+    ("CDG", "Paris CDG", "Paris", "France"),
+    ("YYZ", "Toronto Pearson", "Toronto", "Canada"),
+    ("IST", "Istanbul Airport", "Istanbul", "Turkey"),
+    ("BKK", "Bangkok Intl", "Bangkok", "Thailand"),
+    ("MLE", "Male Intl", "Male", "Maldives"),
+    ("KTM", "Kathmandu Intl", "Kathmandu", "Nepal")
+]
+
+airports = []
+for code, name, city, country in airport_list:
+    airports.append(Airport.objects.create(code=code, name=name, city=city, country=country))
+
+print(f"✔ {len(airports)} airports created.\n")
+
+# ------------------------------
+# FLIGHTS + FARES
+# ------------------------------
+print("🛫 Creating flights...\n")
+
+aircraft_models = ["Airbus A320", "Boeing 737", "Airbus A321", "Boeing 787", "Airbus A350"]
+
+flight_count = 0
+
+for _ in range(250):  # create 250 flights
+    airline = random.choice(airlines)
+    source, destination = random.sample(airports, 2)
+
+    dep = datetime.now() + timedelta(days=random.randint(1, 45), hours=random.randint(0, 23))
+    arr = dep + timedelta(hours=random.randint(2, 14))
+
+    base_price = random.randint(2500, 20000)
+
+    flight = Flight.objects.create(
+        airline=airline,
+        flight_number=f"{airline.code}{random.randint(100,999)}",
+        source=source,
+        destination=destination,
+        departure_time=dep,
+        arrival_time=arr,
+        base_price=base_price,
+        aircraft=random.choice(aircraft_models)
+    )
+
+    # FARES FOR CABINS
+    for cabin in CabinClass.values:
+        Fare.objects.create(
+            flight=flight,
+            cabin_class=cabin,
+            total_seats=random.randint(20, 120),
+            seats_available=random.randint(5, 50),
+            multiplier=random.uniform(1.0, 2.5)
+        )
+
+    flight_count += 1
+
+print(f"✔ {flight_count} flights created successfully.\n")
+
+# ------------------------------
+# COUPONS
+# ------------------------------
+print("🎟 Creating Coupons...")
+
+Coupon.objects.create(
+    code="WELCOME10",
+    description="10% off for new users",
+    discount_percent=10,
+    active=True
+)
+
+Coupon.objects.create(
+    code="FESTIVE20",
+    description="20% off festival sale",
+    discount_percent=20,
+    active=True
+)
+
+Coupon.objects.create(
+    code="PREMIUM5",
+    description="5% off Premium cabin only",
+    discount_percent=5,
+    active=True
+)
+
+print("✔ Coupons created.\n")
+
+print("🎉 DATABASE SEEDING COMPLETED SUCCESSFULLY 🎉")
