@@ -7,14 +7,19 @@ import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
 import MyBookings from "./pages/MyBookings";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FlightList from "./components/FlightList"; // ✅ MUST IMPORT
 
 export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/flights" element={<FlightList />} />
+
+        {/* Protected Pages */}
         <Route
           path="/checkout"
           element={
@@ -33,6 +38,7 @@ export default function App() {
           }
         />
 
+        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
