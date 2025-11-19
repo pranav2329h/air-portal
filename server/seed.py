@@ -79,11 +79,13 @@ aircraft_models = ["Airbus A320", "Boeing 737", "Airbus A321", "Boeing 787", "Ai
 
 flight_count = 0
 
-for _ in range(250):  # create 250 flights
+for _ in range(250):
     airline = random.choice(airlines)
     source, destination = random.sample(airports, 2)
 
-    dep = datetime.now() + timedelta(days=random.randint(1, 45), hours=random.randint(0, 23))
+    # Create naive datetime (no timezone)
+    now = datetime.now().replace(tzinfo=None)
+    dep = now + timedelta(days=random.randint(1, 45), hours=random.randint(0, 23))
     arr = dep + timedelta(hours=random.randint(2, 14))
 
     base_price = random.randint(2500, 20000)
@@ -99,14 +101,14 @@ for _ in range(250):  # create 250 flights
         aircraft=random.choice(aircraft_models)
     )
 
-    # FARES FOR CABINS
+    # Create fares for each cabin
     for cabin in CabinClass.values:
         Fare.objects.create(
             flight=flight,
             cabin_class=cabin,
             total_seats=random.randint(20, 120),
             seats_available=random.randint(5, 50),
-            multiplier=random.uniform(1.0, 2.5)
+            multiplier=round(random.uniform(1.0, 2.5), 2)
         )
 
     flight_count += 1
