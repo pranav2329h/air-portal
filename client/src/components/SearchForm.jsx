@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function SearchForm() {
   const [source, setSource] = useState("BOM");
   const [destination, setDestination] = useState("DEL");
-  const [date, setDate] = useState("");
-
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const navigate = useNavigate();
 
   const onSearch = () => {
