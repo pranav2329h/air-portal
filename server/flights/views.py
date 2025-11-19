@@ -4,6 +4,10 @@ from .serializers import FlightSerializer, CouponSerializer
 from .filters import FlightFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
+class FlightListView(generics.ListAPIView):
+    queryset = Flight.objects.select_related("airline", "source", "destination").prefetch_related("fares")
+    serializer_class = FlightSerializer
+
 class FlightSearchView(generics.ListAPIView):
     queryset = Flight.objects.select_related("airline","source","destination").prefetch_related("fares")
     serializer_class = FlightSerializer
