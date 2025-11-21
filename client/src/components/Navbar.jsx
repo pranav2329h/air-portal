@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <Link to="/" className="navbar-brand">AirPortal</Link>
+        <Link to="/home" className="navbar-brand">AirPortal</Link>
 
         <div className="navbar-links">
           {user && <Link className="nav-link" to="/search">Search</Link>}
