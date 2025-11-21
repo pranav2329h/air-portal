@@ -12,11 +12,17 @@ export default function Navbar() {
         <Link to="/" className="navbar-brand">AirPortal</Link>
 
         <div className="navbar-links">
-          <Link className="nav-link" to="/search">Search</Link>
+          {user && <Link className="nav-link" to="/search">Search</Link>}
+
           {user ? (
             <>
               <Link className="nav-link" to="/bookings">My Bookings</Link>
-              <button className="nav-btn secondary" onClick={() => dispatch(logout())}>Logout</button>
+              <button
+                className="nav-btn secondary"
+                onClick={() => dispatch(logout())}
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>

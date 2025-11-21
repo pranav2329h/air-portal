@@ -24,12 +24,6 @@ airline_list = [
     ("6E", "IndiGo"),
     ("UK", "Vistara"),
     ("SG", "SpiceJet"),
-    ("G8", "Go First"),
-    ("QR", "Qatar Airways"),
-    ("EK", "Emirates"),
-    ("LH", "Lufthansa"),
-    ("SQ", "Singapore Airlines"),
-    ("EY", "Etihad")
 ]
 
 airlines = []
@@ -46,22 +40,6 @@ airport_list = [
     ("DEL", "Delhi Intl", "Delhi", "India"),
     ("BLR", "Bangalore Intl", "Bangalore", "India"),
     ("HYD", "Hyderabad Intl", "Hyderabad", "India"),
-    ("MAA", "Chennai Airport", "Chennai", "India"),
-    ("CCU", "Kolkata Airport", "Kolkata", "India"),
-    ("DXB", "Dubai Intl", "Dubai", "UAE"),
-    ("DOH", "Doha Intl", "Doha", "Qatar"),
-    ("SIN", "Changi Airport", "Singapore", "Singapore"),
-    ("FRA", "Frankfurt Intl", "Frankfurt", "Germany"),
-    ("LHR", "London Heathrow", "London", "UK"),
-    ("JFK", "New York JFK", "New York", "USA"),
-    ("HND", "Tokyo Haneda", "Tokyo", "Japan"),
-    ("SYD", "Sydney Airport", "Sydney", "Australia"),
-    ("CDG", "Paris CDG", "Paris", "France"),
-    ("YYZ", "Toronto Pearson", "Toronto", "Canada"),
-    ("IST", "Istanbul Airport", "Istanbul", "Turkey"),
-    ("BKK", "Bangkok Intl", "Bangkok", "Thailand"),
-    ("MLE", "Male Intl", "Male", "Maldives"),
-    ("KTM", "Kathmandu Intl", "Kathmandu", "Nepal")
 ]
 
 airports = []
@@ -71,49 +49,55 @@ for code, name, city, country in airport_list:
 print(f"✔ {len(airports)} airports created.\n")
 
 # ------------------------------
-# FLIGHTS + FARES
+# FLIGHTS FOR EVERY DAY
 # ------------------------------
-print("🛫 Creating flights...\n")
+print("🛫 Creating guaranteed flights...\n")
 
-aircraft_models = ["Airbus A320", "Boeing 737", "Airbus A321", "Boeing 787", "Airbus A350"]
+start_date = datetime.now()
+days_to_generate = 60   # next 60 days
+
+aircraft_models = ["Airbus A320", "Boeing 737"]
 
 flight_count = 0
 
-for _ in range(250):
-    airline = random.choice(airlines)
-    source, destination = random.sample(airports, 2)
+for day_offset in range(days_to_generate):
+    for source in airports:
+        for destination in airports:
+            if source == destination:
+                continue
 
-    # Create naive datetime (no timezone)
-    now = datetime.now().replace(tzinfo=None)
-    dep = now + timedelta(days=random.randint(1, 45), hours=random.randint(0, 23))
-    arr = dep + timedelta(hours=random.randint(2, 14))
+            # CREATE 2 FLIGHTS PER DAY PER ROUTE
+            for _ in range(2):
+                dep = start_date + timedelta(days=day_offset, hours=random.randint(6, 20))
+                arr = dep + timedelta(hours=random.randint(2, 4))
 
-    base_price = random.randint(2500, 20000)
+                airline = random.choice(airlines)
+                price = random.randint(3000, 15000)
 
-    flight = Flight.objects.create(
-        airline=airline,
-        flight_number=f"{airline.code}{random.randint(100,999)}",
-        source=source,
-        destination=destination,
-        departure_time=dep,
-        arrival_time=arr,
-        base_price=base_price,
-        aircraft=random.choice(aircraft_models)
-    )
+                flight = Flight.objects.create(
+                    airline=airline,
+                    flight_number=f"{airline.code}{random.randint(100,999)}",
+                    source=source,
+                    destination=destination,
+                    departure_time=dep,
+                    arrival_time=arr,
+                    base_price=price,
+                    aircraft=random.choice(aircraft_models)
+                )
 
-    # Create fares for each cabin
-    for cabin in CabinClass.values:
-        Fare.objects.create(
-            flight=flight,
-            cabin_class=cabin,
-            total_seats=random.randint(20, 120),
-            seats_available=random.randint(5, 50),
-            multiplier=round(random.uniform(1.0, 2.5), 2)
-        )
+                # Add 4 cabin types
+                for cabin in CabinClass.values:
+                    Fare.objects.create(
+                        flight=flight,
+                        cabin_class=cabin,
+                        total_seats=50,
+                        seats_available=random.randint(10, 40),
+                        multiplier=random.uniform(1.0, 2.5)
+                    )
 
-    flight_count += 1
+                flight_count += 1
 
-print(f"✔ {flight_count} flights created successfully.\n")
+print(f"✔ {flight_count} flights created successfully!\n")
 
 # ------------------------------
 # COUPONS
@@ -142,5 +126,4 @@ Coupon.objects.create(
 )
 
 print("✔ Coupons created.\n")
-
 print("🎉 DATABASE SEEDING COMPLETED SUCCESSFULLY 🎉")
