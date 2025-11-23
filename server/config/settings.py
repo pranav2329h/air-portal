@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ------------------------------------
-# BASE SETTINGS
+# BASE DIR / SECRET / DEBUG
 # ------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,7 +16,7 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = ["*"]
 
 # ------------------------------------
-# INSTALLED APPS (NO DUPLICATES)
+# INSTALLED APPS
 # ------------------------------------
 INSTALLED_APPS = [
     # Django Core
@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Third-party
+    # Third Party
     "rest_framework",
     "corsheaders",
     "django_filters",
@@ -41,10 +41,10 @@ INSTALLED_APPS = [
 ]
 
 # ------------------------------------
-# MIDDLEWARE (ORDER IS IMPORTANT)
+# MIDDLEWARE
 # ------------------------------------
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # Must be first
+    "corsheaders.middleware.CorsMiddleware",  # Must be FIRST
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -58,14 +58,17 @@ MIDDLEWARE = [
 # CORS SETTINGS
 # ------------------------------------
 CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOWED_ORIGINS = [
     os.getenv("ALLOWED_ORIGINS", "http://localhost:5173"),
 ]
 
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+CSRF_TRUSTED_ORIGINS = [
+    os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+]
 
 # ------------------------------------
-# URLS / WSGI
+# URL CONFIG
 # ------------------------------------
 ROOT_URLCONF = "config.urls"
 
@@ -88,7 +91,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ------------------------------------
-# DATABASE (MySQL)
+# DATABASE CONFIG (MySQL)
 # ------------------------------------
 DATABASES = {
     "default": {
@@ -103,30 +106,31 @@ DATABASES = {
 }
 
 # ------------------------------------
-# TIME & LOCALIZATION
+# TIMEZONE SETTINGS
 # ------------------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 
-# Must stay FALSE for MySQL
+# Important for MySQL
 USE_TZ = False
 
 # ------------------------------------
 # STATIC FILES
 # ------------------------------------
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # good for production
 
 # ------------------------------------
-# REST FRAMEWORK
+# REST FRAMEWORK CONFIG
 # ------------------------------------
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
-    ),
+    ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
@@ -136,19 +140,14 @@ REST_FRAMEWORK = {
 }
 
 # ------------------------------------
-# API DOCUMENTATION
-# ------------------------------------
-SPECTACULAR_SETTINGS = {
-    "TITLE": "AirPortal API",
-    "VERSION": "1.0.0",
-}
-
-# ------------------------------------
-# JWT SETTINGS
+# SIMPLE JWT SETTINGS
 # ------------------------------------
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
 
 # ------------------------------------

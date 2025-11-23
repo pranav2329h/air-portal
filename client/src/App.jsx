@@ -1,33 +1,47 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-// Pages
+import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
 import MyBookings from "./pages/MyBookings";
-import Profile from "./pages/Profile";   // (you will add this file)
+import Profile from "./pages/Profile";
 
-// Auth protection
 import ProtectedRoute from "./components/ProtectedRoute";
+import { setUser } from "./store/authSlice";
+import { me as fetchMe } from "./api/auth";
 
 export default function App() {
+  const dispatch = useDispatch();
+  const user = useSelector((s) => s.auth.user);
+
+  // Load user if token exists
+  useEffect(() => {
+  const token = localStorage.getItem("access");
+  if (token && !user) {
+    fetchMe()
+      .then((res) => dispatch(setUser(res.data)))
+      .catch(() => console.log("Token invalid or expired"));
+  }
+}, []);
   return (
     <BrowserRouter>
-
-      {/* Navbar will show only when user is logged in */}
-      <Navbar />
+      {/* Show Navbar only when user is logged in */}
+      {user && <Navbar />}
 
       <Routes>
-        {/* Default Route → Login Page */}
+        {/* DEFAULT → LOGIN PAGE */}
         <Route path="/" element={<Navigate to="/login" />} />
 
-        <Route path="/login" element={<Login />} />
+        {/* AUTH PAGES */}
+        <Route path="/login" element={user ? <Navigate to="/home" /> : <Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Home - only after login */}
+        {/* MAIN PAGES */}
         <Route
           path="/home"
           element={
@@ -37,7 +51,6 @@ export default function App() {
           }
         />
 
-        {/* Search Results */}
         <Route
           path="/search"
           element={
@@ -47,7 +60,6 @@ export default function App() {
           }
         />
 
-        {/* Checkout */}
         <Route
           path="/checkout"
           element={
@@ -57,7 +69,6 @@ export default function App() {
           }
         />
 
-        {/* User Bookings */}
         <Route
           path="/bookings"
           element={
@@ -67,7 +78,6 @@ export default function App() {
           }
         />
 
-        {/* Profile Page */}
         <Route
           path="/profile"
           element={

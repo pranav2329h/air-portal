@@ -14,7 +14,7 @@ export default function Login() {
 
   const onSubmit = async () => {
     await dispatch(loginThunk(form));
-    navigate("/");
+    navigate("/profile");
   };
 
   return (
