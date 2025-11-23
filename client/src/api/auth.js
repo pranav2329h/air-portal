@@ -1,9 +1,16 @@
 import http from "./http";
 
-export const register = (data) => http.post("/api/auth/register/", data);
+// REGISTER USER
+export const register = (data) =>
+  http.post("/api/auth/register/", data);
 
-export const login = (data) => http.post("/api/auth/token/", data);
+// LOGIN → MUST SEND username + password
+export const login = (username, password) =>
+  http.post("/api/auth/token/", { username, password });
 
-export const getMe = () => http.get("/api/auth/me/");
+// GET LOGGED-IN USER
+export const me = () => http.get("/api/auth/me/");
 
-export const updateProfile = (data) => http.put("/api/auth/update/", data);
+// UPDATE PROFILE
+export const updateProfile = (data) =>
+  http.put("/api/auth/update/", data);

@@ -1,3 +1,5 @@
+# File: air-portal/Server/accounts/models.py
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -10,6 +12,7 @@ class GenderChoices(models.TextChoices):
 
 
 class User(AbstractUser):
+    # Basic fields
     mobile = models.CharField(max_length=20, blank=True)
     passport_id = models.CharField(max_length=32, blank=True)
 
@@ -29,7 +32,7 @@ class User(AbstractUser):
         default="https://cdn-icons-png.flaticon.com/512/149/149071.png"  # default avatar
     )
 
-    # Loyalty
+    # Loyalty points
     loyalty_points = models.PositiveIntegerField(default=0)
 
     def __str__(self):
