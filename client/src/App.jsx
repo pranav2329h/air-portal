@@ -1,33 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
+
+// Pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Home from "./pages/Home";
 import SearchResults from "./pages/SearchResults";
 import Checkout from "./pages/Checkout";
 import MyBookings from "./pages/MyBookings";
+import Profile from "./pages/Profile";   // (you will add this file)
+
+// Auth protection
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useSelector } from "react-redux";
 
 export default function App() {
-  const user = useSelector((s) => s.auth.user);
-
   return (
     <BrowserRouter>
-      {/* Hide navbar on login/register */}
-      {window.location.pathname !== "/login" &&
-       window.location.pathname !== "/register" && <Navbar />}
+
+      {/* Navbar will show only when user is logged in */}
+      <Navbar />
 
       <Routes>
-
-        {/* Redirect / → /login */}
+        {/* Default Route → Login Page */}
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected routes */}
+        {/* Home - only after login */}
         <Route
           path="/home"
           element={
@@ -37,6 +37,7 @@ export default function App() {
           }
         />
 
+        {/* Search Results */}
         <Route
           path="/search"
           element={
@@ -46,6 +47,7 @@ export default function App() {
           }
         />
 
+        {/* Checkout */}
         <Route
           path="/checkout"
           element={
@@ -55,6 +57,7 @@ export default function App() {
           }
         />
 
+        {/* User Bookings */}
         <Route
           path="/bookings"
           element={
@@ -64,6 +67,15 @@ export default function App() {
           }
         />
 
+        {/* Profile Page */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

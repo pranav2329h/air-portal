@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-inner">
         <Link to="/home" className="navbar-brand">AirPortal</Link>
-
+        <Link className="nav-link" to="/profile">Profile</Link>
         <div className="navbar-links">
           {user && <Link className="nav-link" to="/search">Search</Link>}
 
