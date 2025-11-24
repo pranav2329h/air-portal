@@ -1,0 +1,1 @@
+ Safe Updates (reject UPDATEs and DELETEs without a key in WHERE)

@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
 
     # Local Apps
-    "accounts",
     "flights",
     "bookings",
     "payments",
@@ -126,7 +125,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"  # good for production
 # ------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -139,18 +138,3 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# ------------------------------------
-# SIMPLE JWT SETTINGS
-# ------------------------------------
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "AUTH_HEADER_TYPES": ("Bearer",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-}
-
-# ------------------------------------
-# CUSTOM USER MODEL
-# ------------------------------------
-AUTH_USER_MODEL = "accounts.User"
