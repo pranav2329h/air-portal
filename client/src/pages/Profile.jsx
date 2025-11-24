@@ -1,15 +1,11 @@
-import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { updateProfile, me as fetchMe } from "../api/auth";
+import { useState } from "react";
+import { updateProfile } from "../api/auth";
 import { setUser } from "../store/authSlice";
 
 export default function Profile() {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     mobile: user?.mobile || "",
@@ -20,217 +16,171 @@ export default function Profile() {
     profile_image: user?.profile_image || "",
   });
 
-  if (!user) {
-    return (
-      <div className="app-container">
-        <div className="card">
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
-
-  const handleSave = async () => {
+  async function handleSave() {
     try {
       setSaving(true);
-      setError("");
-      await updateProfile(form);
-      const meRes = await fetchMe();
-      dispatch(setUser(meRes.data));
-      setIsEditing(false);
+      const res = await updateProfile(form);
+
+      dispatch(setUser({ ...user, ...form }));
+      setSuccessMsg("Profile updated successfully!");
+      setTimeout(() => setSuccessMsg(""), 3000);
+
     } catch (err) {
       console.error(err);
-      setError("Failed to update profile. Please try again.");
     } finally {
       setSaving(false);
     }
-  };
-
-  const avatarLetter = user.username ? user.username[0].toUpperCase() : "?";
+  }
 
   return (
-    <div className="app-container">
-      {/* MAIN PROFILE CARD */}
-      <div className="profile-layout">
-        {/* LEFT: PROFILE SUMMARY */}
-        <div className="profile-card main-card">
-          <div className="profile-header">
-            <div className="profile-avatar">
-              {user.profile_image ? (
-                <img src={user.profile_image} alt="Avatar" />
-              ) : (
-                <span>{avatarLetter}</span>
-              )}
-            </div>
-            <div className="profile-basic">
-              <h2 className="profile-name">{user.username}</h2>
-              <p className="profile-email">{user.email}</p>
-              <p className="profile-role">AirPortal Traveler</p>
-            </div>
-          </div>
-
-          <div className="profile-stats">
-            <div className="stat-card">
-              <div className="stat-label">Loyalty Points</div>
-              <div className="stat-value">{user.loyalty_points ?? 0}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-label">Mobile</div>
-              <div className="stat-value">{user.mobile || "Not added"}</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-label">Passport ID</div>
-              <div className="stat-value">{user.passport_id || "Not added"}</div>
-            </div>
-          </div>
-
-          <div className="profile-actions">
-            <button className="btn-primary" onClick={() => setIsEditing(true)}>
-              Edit Profile
-            </button>
-            <a href="/bookings" className="btn-secondary">
-              View Bookings
-            </a>
-          </div>
+    <div
+      className="profile-wrapper"
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        padding: "40px",
+        background: "linear-gradient(135deg, #eef2ff, #f8fafc)",
+        minHeight: "100vh",
+      }}
+    >
+      <div
+        className="profile-card"
+        style={{
+          background: "white",
+          padding: "35px",
+          width: "480px",
+          borderRadius: "20px",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+          animation: "fadeIn 0.5s ease",
+        }}
+      >
+        {/* HEADER */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <img
+            src={
+              form.profile_image ||
+              "https://cdn-icons-png.flaticon.com/512/3177/3177440.png"
+            }
+            alt="Profile"
+            style={{
+              width: "90px",
+              height: "90px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "4px solid #6366f1",
+            }}
+          />
+          <h2 style={{ marginTop: "15px", fontWeight: "600" }}>
+            {user?.username}
+          </h2>
+          <p style={{ color: "#6b7280" }}>{user?.email}</p>
         </div>
 
-        {/* RIGHT: DETAILS */}
-        <div className="profile-card details-card">
-          <h3 className="section-title">Personal Details</h3>
-          <div className="profile-detail-grid">
-            <div className="detail-item">
-              <span className="detail-label">Age</span>
-              <span className="detail-value">{user.age ?? "Not set"}</span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Gender</span>
-              <span className="detail-value">
-                {user.gender || "Not set"}
-              </span>
-            </div>
-            <div className="detail-item full">
-              <span className="detail-label">Address</span>
-              <span className="detail-value">
-                {user.address || "Not set"}
-              </span>
-            </div>
+        {/* SUCCESS MESSAGE */}
+        {successMsg && (
+          <div
+            style={{
+              background: "#ecfdf5",
+              padding: "10px",
+              borderRadius: "10px",
+              textAlign: "center",
+              marginBottom: "15px",
+              color: "#059669",
+              fontWeight: "500",
+            }}
+          >
+            {successMsg}
           </div>
+        )}
 
-          <h3 className="section-title mt-lg">Travel Preferences</h3>
-          <p className="muted">
-            (You can later add meal preferences, seat preferences, etc.)
-          </p>
+        {/* FORM */}
+        <div className="field">
+          <label className="label">Mobile</label>
+          <input
+            className="input"
+            value={form.mobile}
+            onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+          />
         </div>
+
+        <div className="field">
+          <label className="label">Passport ID</label>
+          <input
+            className="input"
+            value={form.passport_id}
+            onChange={(e) => setForm({ ...form, passport_id: e.target.value })}
+          />
+        </div>
+
+        <div className="field">
+          <label className="label">Age</label>
+          <input
+            type="number"
+            className="input"
+            value={form.age}
+            onChange={(e) => setForm({ ...form, age: e.target.value })}
+          />
+        </div>
+
+        <div className="field">
+          <label className="label">Gender</label>
+          <select
+            className="input"
+            value={form.gender}
+            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+          >
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div className="field">
+          <label className="label">Address</label>
+          <textarea
+            className="input"
+            rows="2"
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+          />
+        </div>
+
+        <div className="field">
+          <label className="label">Profile Image URL</label>
+          <input
+            className="input"
+            value={form.profile_image}
+            onChange={(e) =>
+              setForm({ ...form, profile_image: e.target.value })
+            }
+          />
+        </div>
+
+        {/* BUTTON */}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginTop: "20px",
+            background: "#6366f1",
+            color: "white",
+            borderRadius: "12px",
+            fontSize: "16px",
+            fontWeight: "600",
+            cursor: "pointer",
+            border: "none",
+            transition: "0.3s",
+          }}
+        >
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
       </div>
-
-      {/* EDIT MODAL */}
-      {isEditing && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h2>Edit Profile</h2>
-
-            {error && <div className="error-text">{error}</div>}
-
-            <div className="modal-form">
-              <div className="field-group">
-                <label className="field-label">Mobile</label>
-                <input
-                  className="input"
-                  name="mobile"
-                  value={form.mobile}
-                  onChange={handleChange}
-                  placeholder="Enter mobile number"
-                />
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Passport ID</label>
-                <input
-                  className="input"
-                  name="passport_id"
-                  value={form.passport_id}
-                  onChange={handleChange}
-                  placeholder="Passport number"
-                />
-              </div>
-
-              <div className="field-row">
-                <div className="field-group">
-                  <label className="field-label">Age</label>
-                  <input
-                    className="input"
-                    name="age"
-                    type="number"
-                    value={form.age}
-                    onChange={handleChange}
-                    placeholder="Age"
-                  />
-                </div>
-
-                <div className="field-group">
-                  <label className="field-label">Gender</label>
-                  <select
-                    className="input"
-                    name="gender"
-                    value={form.gender}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Address</label>
-                <textarea
-                  className="input"
-                  name="address"
-                  rows="3"
-                  value={form.address}
-                  onChange={handleChange}
-                  placeholder="Your full address"
-                />
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Profile Image URL</label>
-                <input
-                  className="input"
-                  name="profile_image"
-                  value={form.profile_image}
-                  onChange={handleChange}
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button
-                className="btn-secondary"
-                onClick={() => setIsEditing(false)}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn-primary"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

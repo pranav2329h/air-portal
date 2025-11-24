@@ -1,118 +1,116 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  login as apiLogin,
-  register as apiRegister,
-  me,
-  updateProfile,
-  changePassword
-} from "../api/auth";
 
-// -----------------------------------------
-// LOGIN (GET TOKEN + USER INFO)
-// -----------------------------------------
-export const loginThunk = createAsyncThunk(
-  "auth/login",
-  async ({ username, password }, thunkAPI) => {
-    try {
-      const { data } = await apiLogin(username, password);
+const USERS_KEY = "users";
+const CURRENT_USER_KEY = "currentUser";
 
-      // Save tokens
-      localStorage.setItem("access", data.access);
-      localStorage.setItem("refresh", data.refresh);
-
-      return data.user; // user already included
-    } catch (err) {
-      return thunkAPI.rejectWithValue("Invalid username or password");
-    }
+function loadUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
-);
+}
 
-// -----------------------------------------
-// REGISTER
-// -----------------------------------------
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
 export const registerThunk = createAsyncThunk(
   "auth/register",
-  async ({ username, email, password }, thunkAPI) => {
-    try {
-      const { data } = await apiRegister({ username, email, password });
-      return data.user;
-    } catch (err) {
-      return thunkAPI.rejectWithValue("Registration failed");
+  async (payload, { rejectWithValue }) => {
+    const users = loadUsers();
+
+    if (users.find((u) => u.username === payload.username)) {
+      return rejectWithValue("Username already exists");
     }
+
+    const newUser = {
+      id: Date.now(),
+      username: payload.username,
+      email: payload.email || "",
+      password: payload.password,
+      first_name: payload.first_name || "",
+      last_name: payload.last_name || "",
+      mobile: payload.mobile || "",
+      passport_id: payload.passport_id || "",
+      age: payload.age || "",
+      gender: payload.gender || "",
+      address: payload.address || "",
+      profile_image: payload.profile_image || "",
+      loyalty_points: 0,
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+
+    return newUser;
   }
 );
 
-// -----------------------------------------
-// LOAD PROFILE (ME)
-// -----------------------------------------
-export const loadProfileThunk = createAsyncThunk(
-  "auth/loadProfile",
-  async (_, thunkAPI) => {
-    try {
-      const { data } = await me();
-      return data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue("Failed to load profile");
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async ({ username, password }, { rejectWithValue }) => {
+    const users = loadUsers();
+    const user = users.find(
+      (u) => u.username === username && u.password === password
+    );
+
+    if (!user) {
+      return rejectWithValue("Invalid username or password");
     }
+
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    return user;
   }
 );
 
-// -----------------------------------------
-// UPDATE PROFILE
-// -----------------------------------------
-export const updateProfileThunk = createAsyncThunk(
-  "auth/updateProfile",
-  async (payload, thunkAPI) => {
-    try {
-      const { data } = await updateProfile(payload);
-      return data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue("Failed to update profile");
-    }
-  }
-);
+const storedUser = localStorage.getItem(CURRENT_USER_KEY);
 
-// -----------------------------------------
-// CHANGE PASSWORD
-// -----------------------------------------
-export const changePasswordThunk = createAsyncThunk(
-  "auth/changePassword",
-  async ({ old_password, new_password }, thunkAPI) => {
-    try {
-      const { data } = await changePassword({
-        old_password,
-        new_password,
-      });
-      return data.message;
-    } catch (err) {
-      return thunkAPI.rejectWithValue("Failed to change password");
-    }
-  }
-);
-
-// -----------------------------------------
-// SLICE
-// -----------------------------------------
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
+    user: storedUser ? JSON.parse(storedUser) : null,
     loading: false,
     error: null,
-    message: null,
   },
-
   reducers: {
+    setUser(state, action) {
+      state.user = action.payload;
+      state.error = null;
+    },
+    updateUser(state, action) {
+      state.user = { ...state.user, ...action.payload };
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(state.user));
+
+      const users = loadUsers();
+      const idx = users.findIndex((u) => u.id === state.user.id);
+      if (idx !== -1) {
+        users[idx] = state.user;
+        saveUsers(users);
+      }
+    },
     logout(state) {
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
       state.user = null;
+      state.error = null;
+      localStorage.removeItem(CURRENT_USER_KEY);
     },
   },
-
   extraReducers: (builder) => {
-    // LOGIN
     builder
+      .addCase(registerThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(registerThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Registration failed";
+      })
       .addCase(loginThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -123,31 +121,10 @@ const authSlice = createSlice({
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Login failed";
       });
-
-    // REGISTER
-    builder.addCase(registerThunk.fulfilled, (state, action) => {
-      state.user = action.payload;
-    });
-
-    // LOAD PROFILE
-    builder.addCase(loadProfileThunk.fulfilled, (state, action) => {
-      state.user = action.payload;
-    });
-
-    // UPDATE PROFILE
-    builder.addCase(updateProfileThunk.fulfilled, (state, action) => {
-      state.user = action.payload;
-      state.message = "Profile updated successfully";
-    });
-
-    // CHANGE PASSWORD
-    builder.addCase(changePasswordThunk.fulfilled, (state, action) => {
-      state.message = action.payload; // "Password changed"
-    });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setUser, updateUser } = authSlice.actions;
 export default authSlice.reducer;

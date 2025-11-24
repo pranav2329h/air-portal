@@ -1,6 +1,6 @@
-/* ===========
-   GLOBAL RESET
-   =========== */
+/* -------------------------
+   GLOBAL RESET & BODY
+-------------------------- */
 *,
 *::before,
 *::after {
@@ -9,220 +9,180 @@
   padding: 0;
 }
 
-html,
 body {
-  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
+    "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #121826 0, #050816 45%, #020617 100%);
+  color: #e5e7eb;
+  min-height: 100vh;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Inter", "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top left, #0b172a 0, #050816 45%, #02040a 100%);
-  color: #f9fafb;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Root app wrapper (Vite/React) */
+/* Let the React root fill vertically */
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.6);
-  border-radius: 999px;
-}
-
-/* ===========
-   LAYOUT
-   =========== */
+/* -------------------------
+   LAYOUT / CONTAINERS
+-------------------------- */
 .app-container {
   max-width: 1100px;
-  width: 100%;
-  margin: 90px auto 40px; /* leave space for navbar */
-  padding: 0 16px 32px;
+  margin: 80px auto 40px;
+  padding: 0 20px;
 }
 
-/* generic spacing helpers */
-.mt-sm {
-  margin-top: 8px;
-}
-.mt-md {
-  margin-top: 16px;
-}
-.mt-lg {
-  margin-top: 24px;
-}
-
-/* ===========
-   TYPOGRAPHY
-   =========== */
 .page-title {
   font-size: 2.2rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
-  color: #e5e7eb;
-  text-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+  margin-bottom: 0.4rem;
+  color: #f9fafb;
 }
 
 .page-subtitle {
-  font-size: 0.97rem;
-  margin-top: 8px;
+  font-size: 0.95rem;
   color: #9ca3af;
 }
 
-/* ===========
+/* Margin utility */
+.mt-md {
+  margin-top: 1rem;
+}
+
+/* -------------------------
    NAVBAR
-   =========== */
+-------------------------- */
 .navbar {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 50;
   backdrop-filter: blur(18px);
   background: linear-gradient(
     to right,
-    rgba(15, 23, 42, 0.92),
-    rgba(2, 6, 23, 0.95)
+    rgba(15, 23, 42, 0.95),
+    rgba(15, 23, 42, 0.92)
   );
-  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .navbar-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 0.8rem 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
 }
 
 .navbar-brand {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #e5e7eb;
+  color: #38bdf8;
   text-decoration: none;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .navbar-brand::before {
   content: "✈";
-  font-size: 1rem;
-  transform: translateY(-1px);
+  font-size: 1.1rem;
 }
 
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
 }
 
 .nav-link {
-  font-size: 0.9rem;
-  color: #cbd5f5;
   text-decoration: none;
-  padding: 6px 10px;
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.6rem;
   border-radius: 999px;
   transition: all 0.18s ease;
 }
 
 .nav-link:hover {
+  background: rgba(148, 163, 184, 0.16);
   color: #f9fafb;
-  background: rgba(148, 163, 184, 0.18);
 }
 
 /* Navbar buttons */
 .nav-btn {
   border: none;
   outline: none;
-  font-size: 0.9rem;
-  padding: 7px 15px;
+  padding: 0.45rem 1.1rem;
   border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
-  font-weight: 600;
-  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-  color: #020617;
-  box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
-  transition: all 0.2s ease-in-out;
+  background: linear-gradient(to right, #38bdf8, #6366f1);
+  color: #0b1120;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 }
 
 .nav-btn:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 0 28px rgba(56, 189, 248, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 45px rgba(37, 99, 235, 0.6);
+  opacity: 0.95;
 }
 
 .nav-btn.secondary {
   background: transparent;
   color: #e5e7eb;
-  border: 1px solid rgba(148, 163, 184, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.6);
   box-shadow: none;
 }
 
 .nav-btn.secondary:hover {
-  background: rgba(30, 64, 175, 0.6);
-  border-color: #3b82f6;
+  background: rgba(148, 163, 184, 0.12);
+  transform: none;
 }
 
-/* ===========
-   CARD
-   =========== */
+/* -------------------------
+   CARD / PANELS
+-------------------------- */
 .card {
-  background: radial-gradient(circle at top left, #0f172a 0, #020617 55%);
-  border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  padding: 18px 18px 16px;
+  background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+  border-radius: 18px;
+  padding: 1.5rem 1.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
   box-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.9),
+    0 18px 40px rgba(15, 23, 42, 0.85),
     0 0 0 1px rgba(15, 23, 42, 0.8);
 }
 
-/* ===========
-   SEARCH FORM
-   =========== */
-.search-form {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  align-items: flex-end;
-}
-
+/* -------------------------
+   FORM ELEMENTS
+-------------------------- */
 .field-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.35rem;
 }
 
 .field-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 0.85rem;
   color: #9ca3af;
 }
 
 .input {
+  width: 100%;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(15, 23, 42, 0.85);
   color: #e5e7eb;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.95rem;
   outline: none;
-  transition: all 0.18s ease;
+  transition: border 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+    transform 0.08s ease;
 }
 
 .input::placeholder {
@@ -231,266 +191,182 @@ body {
 
 .input:focus {
   border-color: #38bdf8;
-  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5),
+    0 10px 30px rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.96);
+  transform: translateY(-0.5px);
 }
 
-/* Main search button */
-.btn-primary {
-  border: none;
-  outline: none;
+/* Textarea variant */
+.input.textarea {
+  border-radius: 14px;
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* -------------------------
+   BUTTONS
+-------------------------- */
+.btn-primary,
+.btn-secondary {
   border-radius: 999px;
-  padding: 10px 20px;
+  padding: 0.65rem 1.3rem;
   font-size: 0.95rem;
-  font-weight: 600;
+  border: none;
   cursor: pointer;
-  background: radial-gradient(circle at top left, #38bdf8 0, #0ea5e9 45%, #0369a1 100%);
-  color: #020617;
-  box-shadow:
-    0 16px 40px rgba(8, 47, 73, 0.95),
-    0 0 18px rgba(56, 189, 248, 0.65);
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.18s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #0b1120;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.6);
 }
 
 .btn-primary:hover {
-  transform: translateY(-1px) scale(1.02);
-  box-shadow:
-    0 18px 44px rgba(8, 47, 73, 0.95),
-    0 0 24px rgba(56, 189, 248, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 0 24px 55px rgba(37, 99, 235, 0.9);
 }
 
-.btn-primary:active {
-  transform: translateY(1px) scale(0.99);
-  box-shadow:
-    0 8px 28px rgba(8, 47, 73, 0.85),
-    0 0 16px rgba(56, 189, 248, 0.65);
-}
-
-/* ===========
-   FLIGHT LIST
-   =========== */
-.flights-list {
-  margin-top: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* optional class if your card wrapper is different */
-.flight-card {
-  border-radius: 20px;
-  padding: 12px 16px;
-}
-
-/* ===========
-   AUTH PAGES (LOGIN / REGISTER)
-   =========== */
-
-.auth-wrapper {
-  min-height: calc(100vh - 80px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 90px 16px 24px;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 420px;
-  background: radial-gradient(circle at top left, #020617 0, #020617 55%);
-  border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  box-shadow:
-    0 22px 40px rgba(15, 23, 42, 0.9),
-    0 0 0 1px rgba(15, 23, 42, 0.8);
-  padding: 22px 22px 18px;
-}
-
-.auth-title {
-  font-size: 1.4rem;
-  font-weight: 700;
+.btn-secondary {
+  background: transparent;
   color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.7);
 }
 
-.auth-subtitle {
-  margin-top: 4px;
-  color: #9ca3af;
-  font-size: 0.9rem;
+.btn-secondary:hover {
+  background: rgba(148, 163, 184, 0.12);
 }
 
-.auth-form {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.auth-footer {
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: #9ca3af;
-}
-
-/* ===========
-   PROFILE PAGE
-   =========== */
-.profile-layout {
+/* -------------------------
+   SEARCH FORM LAYOUT
+-------------------------- */
+.search-form {
   display: grid;
-  grid-template-columns: minmax(0, 2.3fr) minmax(0, 1.7fr);
-  gap: 16px;
-  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: flex-end;
 }
 
-.profile-card {
-  padding: 18px 18px 16px;
-  border-radius: 22px;
-  background: radial-gradient(circle at top left, #020617 0, #020617 55%);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-}
-
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.avatar-lg {
-  width: 58px;
-  height: 58px;
-  border-radius: 999px;
-  background: radial-gradient(circle at top left, #38bdf8 0, #0f172a 60%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0b1120;
-  font-weight: 700;
-  font-size: 1.3rem;
-  box-shadow: 0 0 22px rgba(56, 189, 248, 0.7);
-}
-
-.profile-name {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.profile-username {
-  font-size: 0.85rem;
-  color: #9ca3af;
-}
-
-.profile-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #6b7280;
-}
-
-.profile-value {
-  font-size: 0.92rem;
-  color: #e5e7eb;
-}
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 14px;
-  margin-top: 10px;
-}
-
-.profile-stats {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.pill {
-  border-radius: 999px;
-  padding: 6px 10px;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  color: #9ca3af;
-}
-
-/* profile form (edit) */
-.profile-form {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-form .field-group {
-  gap: 4px;
-}
-
-/* ===========
-   BADGES / TAGS
-   =========== */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  padding: 3px 8px;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-
-.badge-economy {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
-}
-
-.badge-business {
-  background: rgba(56, 189, 248, 0.12);
-  color: #38bdf8;
-}
-
-.badge-first {
-  background: rgba(234, 179, 8, 0.12);
-  color: #facc15;
-}
-
-/* ===========
-   RESPONSIVE
-   =========== */
 @media (max-width: 900px) {
   .search-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .profile-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .navbar-inner {
-    padding-inline: 12px;
+}
+@media (max-width: 640px) {
+  .search-form {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 640px) {
-  .navbar-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
+/* -------------------------
+   FLIGHTS LIST / CARDS
+-------------------------- */
+.flights-list {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-  .navbar-links {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
+/* Example flight-card styling if you use <div className="card flight-card"> */
+.flight-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
 
-  .search-form {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.flight-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  .app-container {
-    margin-top: 96px;
-    padding-inline: 12px;
-  }
+.flight-card-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.flight-time {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+.flight-city {
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+/* -------------------------
+   PROFILE PAGE UTILS
+-------------------------- */
+.profile-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 3px solid rgba(148, 163, 184, 0.7);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.9);
+}
+
+/* -------------------------
+   AUTH PAGES (CENTER)
+-------------------------- */
+.auth-container {
+  max-width: 420px;
+  margin: 100px auto 40px;
+  padding: 0 20px;
+}
+
+.auth-card {
+  background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+  border-radius: 18px;
+  padding: 1.8rem 1.8rem 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow:
+    0 18px 40px rgba(15, 23, 42, 0.85),
+    0 0 0 1px rgba(15, 23, 42, 0.8);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.3rem;
+}
+
+.auth-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.auth-link {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
 }

@@ -13,35 +13,37 @@ import Profile from "./pages/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { setUser } from "./store/authSlice";
-import { me as fetchMe } from "./api/auth";
 
 export default function App() {
   const dispatch = useDispatch();
   const user = useSelector((s) => s.auth.user);
 
-  // Load user if token exists
+  // Hydrate from localStorage
   useEffect(() => {
-  const token = localStorage.getItem("access");
-  if (token && !user) {
-    fetchMe()
-      .then((res) => dispatch(setUser(res.data)))
-      .catch(() => console.log("Token invalid or expired"));
-  }
-}, []);
+    const raw = localStorage.getItem("currentUser");
+    if (raw) {
+      try {
+        dispatch(setUser(JSON.parse(raw)));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [dispatch]);
+
   return (
     <BrowserRouter>
-      {/* Show Navbar only when user is logged in */}
       {user && <Navbar />}
 
       <Routes>
-        {/* DEFAULT → LOGIN PAGE */}
+        {/* Default → login */}
         <Route path="/" element={<Navigate to="/login" />} />
 
-        {/* AUTH PAGES */}
-        <Route path="/login" element={user ? <Navigate to="/home" /> : <Login />} />
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/home" /> : <Login />}
+        />
         <Route path="/register" element={<Register />} />
 
-        {/* MAIN PAGES */}
         <Route
           path="/home"
           element={
