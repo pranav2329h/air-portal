@@ -1,79 +1,78 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import http from "../api/http";
+import { FaPlaneDeparture, FaPlaneArrival, FaExchangeAlt } from "react-icons/fa";
 
 export default function SearchForm() {
-  const [airports, setAirports] = useState([]);
-  const [filteredSource, setFilteredSource] = useState([]);
-  const [filteredDestination, setFilteredDestination] = useState([]);
-
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
+  const [airportList, setAirportList] = useState([]);
+  const [filteredSource, setFilteredSource] = useState([]);
+  const [filteredDestination, setFilteredDestination] = useState([]);
+
   const navigate = useNavigate();
 
-  // Fetch airport list
+  // Load airport list from backend
   useEffect(() => {
-    http.get("/flights/airports/").then((res) => {
-      setAirports(res.data);
-    });
+    fetch("http://localhost:8000/api/flights/airports/")
+      .then((res) => res.json())
+      .then((data) => setAirportList(data));
   }, []);
 
-  // Filter source airports
-  const handleSourceChange = (value) => {
-    setSource(value);
-    if (value.length > 0) {
-      setFilteredSource(
-        airports.filter(
-          (a) =>
-            a.code.toLowerCase().includes(value.toLowerCase()) ||
-            a.city.toLowerCase().includes(value.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredSource([]);
-    }
-  };
-
-  // Filter destination airports
-  const handleDestinationChange = (value) => {
-    setDestination(value);
-    if (value.length > 0) {
-      setFilteredDestination(
-        airports.filter(
-          (a) =>
-            a.code.toLowerCase().includes(value.toLowerCase()) ||
-            a.city.toLowerCase().includes(value.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredDestination([]);
-    }
-  };
-
-  const onSearch = () => {
-    navigate(
-      `/search?source=${source}&destination=${destination}&date=${date}`
+  // Filter dropdown list
+  const filterAirports = (text) => {
+    if (!text) return [];
+    return airportList.filter((a) =>
+      a.code.toLowerCase().includes(text.toLowerCase()) ||
+      a.city.toLowerCase().includes(text.toLowerCase()) ||
+      a.name.toLowerCase().includes(text.toLowerCase())
     );
   };
 
-  return (
-    <div className="card">
-      <div className="search-form">
+  // Swap FROM & TO
+  const swapAirports = () => {
+    const temp = source;
+    setSource(destination);
+    setDestination(temp);
+  };
 
-        {/* SOURCE */}
-        <div className="field-group" style={{ position: "relative" }}>
-          <label className="field-label">From</label>
+  const onSearch = () => {
+    if (!source || !destination || !date) {
+      alert("Please select all fields");
+      return;
+    }
+
+    navigate(`/search?source=${source}&destination=${destination}&date=${date}`);
+  };
+
+  return (
+    <div className="premium-search-card">
+
+      <h2 className="search-title">Find Your Perfect Flight ✈️</h2>
+
+      <div className="form-row">
+
+        {/* FROM */}
+        <div className="input-group">
+          <label className="input-label">
+            <FaPlaneDeparture className="icon" /> From
+          </label>
+
           <input
-            className="input"
-            placeholder="Type city or airport"
+            className="input-field"
+            placeholder="Mumbai, BOM"
             value={source}
-            onChange={(e) => handleSourceChange(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setSource(v);
+              setFilteredSource(filterAirports(v));
+            }}
           />
 
+          {/* Auto Suggest */}
           {filteredSource.length > 0 && (
-            <div className="dropdown-menu">
+            <div className="dropdown">
               {filteredSource.map((a) => (
                 <div
                   key={a.code}
@@ -83,25 +82,38 @@ export default function SearchForm() {
                     setFilteredSource([]);
                   }}
                 >
-                  {a.city} ({a.code}) – {a.country}
+                  <strong>{a.code}</strong> — {a.city}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* DESTINATION */}
-        <div className="field-group" style={{ position: "relative" }}>
-          <label className="field-label">To</label>
+        {/* SWAP BUTTON */}
+        <button className="swap-btn" onClick={swapAirports}>
+          <FaExchangeAlt />
+        </button>
+
+        {/* TO */}
+        <div className="input-group">
+          <label className="input-label">
+            <FaPlaneArrival className="icon" /> To
+          </label>
+
           <input
-            className="input"
-            placeholder="Type city or airport"
+            className="input-field"
+            placeholder="Delhi, DEL"
             value={destination}
-            onChange={(e) => handleDestinationChange(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setDestination(v);
+              setFilteredDestination(filterAirports(v));
+            }}
           />
 
+          {/* Auto Suggest */}
           {filteredDestination.length > 0 && (
-            <div className="dropdown-menu">
+            <div className="dropdown">
               {filteredDestination.map((a) => (
                 <div
                   key={a.code}
@@ -111,29 +123,30 @@ export default function SearchForm() {
                     setFilteredDestination([]);
                   }}
                 >
-                  {a.city} ({a.code}) – {a.country}
+                  <strong>{a.code}</strong> — {a.city}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* DATE */}
-        <div className="field-group">
-          <label className="field-label">Departure Date</label>
-          <input
-            className="input"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-
-        {/* SEARCH BUTTON */}
-        <button className="btn-primary" onClick={onSearch}>
-          Search Flights
-        </button>
       </div>
+
+      {/* DATE */}
+      <div className="input-group mt-lg">
+        <label className="input-label">Departure Date</label>
+        <input
+          className="input-field"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
+
+      {/* SEARCH BUTTON */}
+      <button className="premium-search-btn" onClick={onSearch}>
+        Search Flights ✈️
+      </button>
     </div>
   );
 }
