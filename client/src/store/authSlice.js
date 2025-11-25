@@ -1,42 +1,47 @@
-// client/src/store/authSlice.js
+// src/store/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login as apiLogin, register as apiRegister, me as apiMe, logoutLocal } from "../api/auth";
+import {
+  login as apiLogin,
+  register as apiRegister,
+  me as apiMe,
+  logoutLocal,
+} from "../api/auth";
 
-// 🔐 LOGIN (Frontend-only, localStorage)
+// LOGIN
 export const loginThunk = createAsyncThunk(
   "auth/login",
   async ({ username, password }, { rejectWithValue }) => {
     try {
-      const res = await apiLogin({ username, password });
-      return res.data; // return logged-in user
+      const { data } = await apiLogin({ username, password });
+      return data;
     } catch (err) {
       return rejectWithValue(err.message || "Invalid username or password");
     }
   }
 );
 
-// 🆕 REGISTER
+// REGISTER
 export const registerThunk = createAsyncThunk(
   "auth/register",
-  async (formData, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const res = await apiRegister(formData);
-      return res.data;
+      const { data } = await apiRegister(payload);
+      return data;
     } catch (err) {
-      return rejectWithValue(err.message);
+      return rejectWithValue(err.message || "Register failed");
     }
   }
 );
 
-// 🔄 LOAD USER FROM LOCALSTORAGE
+// LOAD USER FROM localStorage ON APP START
 export const loadUserFromStorage = createAsyncThunk(
   "auth/loadUser",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await apiMe();
-      return res.data;
+      const { data } = await apiMe();
+      return data;
     } catch {
-      return rejectWithValue(null);
+      return rejectWithValue("No user");
     }
   }
 );
@@ -48,18 +53,16 @@ const authSlice = createSlice({
     loading: false,
     error: null,
   },
-
   reducers: {
     logout(state) {
-      logoutLocal(); // clear localStorage
+      logoutLocal();
       state.user = null;
       state.error = null;
     },
   },
-
   extraReducers: (builder) => {
     builder
-      // LOGIN ----------
+      // login
       .addCase(loginThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -70,24 +73,24 @@ const authSlice = createSlice({
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Login failed";
       })
 
-      // REGISTER ----------
+      // register
       .addCase(registerThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(registerThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload; // auto-login after register
+        state.user = action.payload;
       })
       .addCase(registerThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || "Register failed";
       })
 
-      // LOAD USER ----------
+      // load user from storage
       .addCase(loadUserFromStorage.fulfilled, (state, action) => {
         state.user = action.payload;
       });

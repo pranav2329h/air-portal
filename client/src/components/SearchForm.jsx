@@ -1,24 +1,30 @@
-import { useEffect, useState } from "react";
+// src/components/SearchForm.jsx
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlaneDeparture, FaPlaneArrival, FaExchangeAlt, FaSearch } from "react-icons/fa";
-import { getAirports } from "../api/flights";
+
+const AIRPORTS = [
+  { code: "BOM", city: "Mumbai", name: "Mumbai Intl" },
+  { code: "DEL", city: "Delhi", name: "Delhi Intl" },
+  { code: "BLR", city: "Bangalore", name: "Bangalore Intl" },
+  { code: "HYD", city: "Hyderabad", name: "Hyderabad Intl" },
+  { code: "MAA", city: "Chennai", name: "Chennai Airport" },
+  { code: "CCU", city: "Kolkata", name: "Kolkata Airport" },
+  { code: "DXB", city: "Dubai", name: "Dubai Intl" },
+  { code: "DOH", city: "Doha", name: "Doha Intl" },
+  { code: "SIN", city: "Singapore", name: "Changi Airport" },
+];
 
 export default function SearchForm() {
-  const navigate = useNavigate();
+  const today = new Date().toISOString().split("T")[0];
 
-  const [airports, setAirports] = useState([]);
   const [source, setSource] = useState("BOM");
   const [destination, setDestination] = useState("DEL");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState(today);
 
-  const [activeField, setActiveField] = useState(null); // "source" | "destination" | null
+  const [fromQuery, setFromQuery] = useState("");
+  const [toQuery, setToQuery] = useState("");
 
-  // Fetch airports once
-  useEffect(() => {
-    getAirports()
-      .then((res) => setAirports(res.data))
-      .catch((err) => console.error("Failed to load airports", err));
-  }, []);
+  const navigate = useNavigate();
 
   const onSearch = () => {
     navigate(
@@ -26,113 +32,77 @@ export default function SearchForm() {
     );
   };
 
-  const onSwap = () => {
-    setSource(destination);
-    setDestination(source);
-  };
-
-  const handleSelectAirport = (field, code) => {
-    if (field === "source") setSource(code);
-    if (field === "destination") setDestination(code);
-    setActiveField(null);
-  };
-
-  const filteredAirports = (text) => {
-    const q = text.toLowerCase();
-    return airports.filter(
+  const filterAirports = (q) => {
+    const query = q.toLowerCase();
+    if (!query) return [];
+    return AIRPORTS.filter(
       (a) =>
-        a.code.toLowerCase().includes(q) ||
-        a.city.toLowerCase().includes(q) ||
-        a.name.toLowerCase().includes(q)
-    );
+        a.code.toLowerCase().includes(query) ||
+        a.city.toLowerCase().includes(query) ||
+        a.name.toLowerCase().includes(query)
+    ).slice(0, 6);
   };
+
+  const fromSuggestions = filterAirports(fromQuery);
+  const toSuggestions = filterAirports(toQuery);
 
   return (
-    <div className="card search-card">
+    <div className="card">
       <div className="search-form">
-
         {/* FROM */}
         <div className="field-group">
-          <label className="field-label">
-            <FaPlaneDeparture style={{ marginRight: 6 }} />
-            From
-          </label>
-          <div className="input-with-dropdown">
-            <input
-              className="input"
-              placeholder="City or airport"
-              value={source}
-              onFocus={() => setActiveField("source")}
-              onChange={(e) => setSource(e.target.value.toUpperCase())}
-            />
-            {activeField === "source" && (
-              <div className="dropdown-list">
-                {filteredAirports(source).map((a) => (
-                  <div
-                    key={a.id}
-                    className="dropdown-item"
-                    onMouseDown={() => handleSelectAirport("source", a.code)}
-                  >
-                    <span className="dropdown-main">
-                      {a.city} ({a.code})
-                    </span>
-                    <span className="dropdown-sub">{a.name}</span>
-                  </div>
-                ))}
-                {filteredAirports(source).length === 0 && (
-                  <div className="dropdown-empty">No matching airports</div>
-                )}
-              </div>
-            )}
-          </div>
+          <label className="field-label">From</label>
+          <input
+            className="input"
+            placeholder="Search city or airport"
+            value={fromQuery}
+            onChange={(e) => setFromQuery(e.target.value)}
+          />
+          {fromSuggestions.length > 0 && (
+            <div className="suggestion-box">
+              {fromSuggestions.map((a) => (
+                <div
+                  key={a.code}
+                  className="suggestion-item"
+                  onClick={() => {
+                    setSource(a.code);
+                    setFromQuery(`${a.city} (${a.code})`);
+                  }}
+                >
+                  <strong>{a.city}</strong> – {a.name} ({a.code})
+                </div>
+              ))}
+            </div>
+          )}
+          <small className="hint">Selected: {source}</small>
         </div>
-
-        {/* SWITCH */}
-        <button
-          type="button"
-          className="swap-btn"
-          onClick={onSwap}
-          title="Swap"
-        >
-          <FaExchangeAlt />
-        </button>
 
         {/* TO */}
         <div className="field-group">
-          <label className="field-label">
-            <FaPlaneArrival style={{ marginRight: 6 }} />
-            To
-          </label>
-          <div className="input-with-dropdown">
-            <input
-              className="input"
-              placeholder="City or airport"
-              value={destination}
-              onFocus={() => setActiveField("destination")}
-              onChange={(e) => setDestination(e.target.value.toUpperCase())}
-            />
-            {activeField === "destination" && (
-              <div className="dropdown-list">
-                {filteredAirports(destination).map((a) => (
-                  <div
-                    key={a.id}
-                    className="dropdown-item"
-                    onMouseDown={() =>
-                      handleSelectAirport("destination", a.code)
-                    }
-                  >
-                    <span className="dropdown-main">
-                      {a.city} ({a.code})
-                    </span>
-                    <span className="dropdown-sub">{a.name}</span>
-                  </div>
-                ))}
-                {filteredAirports(destination).length === 0 && (
-                  <div className="dropdown-empty">No matching airports</div>
-                )}
-              </div>
-            )}
-          </div>
+          <label className="field-label">To</label>
+          <input
+            className="input"
+            placeholder="Search city or airport"
+            value={toQuery}
+            onChange={(e) => setToQuery(e.target.value)}
+          />
+          {toSuggestions.length > 0 && (
+            <div className="suggestion-box">
+              {toSuggestions.map((a) => (
+                <div
+                  key={a.code}
+                  className="suggestion-item"
+                  onClick={() => {
+                    setDestination(a.code);
+                    setToQuery(`${a.city} (${a.code})`);
+                  }}
+                >
+                  <strong>{a.city}</strong> – {a.name} ({a.code})
+                </div>
+              ))}
+            </div>
+          )}
+          <small className="hint">Selected: {destination}</small>
         </div>
 
         {/* DATE */}
@@ -142,14 +112,13 @@ export default function SearchForm() {
             className="input"
             type="date"
             value={date}
-            min={new Date().toISOString().split("T")[0]}
+            min={today}
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
 
-        {/* BUTTON */}
-        <button className="btn-primary search-btn" onClick={onSearch}>
-          <FaSearch style={{ marginRight: 6 }} />
+        {/* SUBMIT */}
+        <button className="btn-primary" onClick={onSearch}>
           Search Flights
         </button>
       </div>

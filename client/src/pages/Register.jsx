@@ -1,104 +1,76 @@
-// client/src/pages/Register.jsx
+// src/pages/Register.jsx
 import { useState } from "react";
-import { register as apiRegister } from "../api/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerThunk } from "../store/authSlice";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useSelector((s) => s.auth);
 
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
-    first_name: "",
-    last_name: "",
-    mobile: "",
-    passport_id: "",
   });
 
-  const [error, setError] = useState("");
-
-  const onSubmit = async () => {
-    try {
-      setError("");
-      await apiRegister(form);
-      // after register we auto-logged in, go home
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const res = await dispatch(registerThunk(form));
+    if (res.meta.requestStatus === "fulfilled") {
       navigate("/home");
-    } catch (err) {
-      setError(err?.message || "Registration failed");
     }
   };
 
   return (
-    <div className="app-container" style={{ maxWidth: 500 }}>
-      <h2 className="page-title">Create Account</h2>
-      <p className="page-subtitle">
-        Sign up to search flights and manage your bookings.
-      </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2 className="page-title">Create your account</h2>
+        <p className="page-subtitle">Book flights with a single login.</p>
 
-      <input
-        className="input mt-md"
-        placeholder="Username"
-        value={form.username}
-        onChange={(e) =>
-          setForm({ ...form, username: e.target.value })
-        }
-      />
+        <form onSubmit={onSubmit}>
+          <input
+            className="input mt-md"
+            placeholder="Username"
+            value={form.username}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, username: e.target.value }))
+            }
+          />
 
-      <input
-        className="input mt-md"
-        placeholder="Email"
-        value={form.email}
-        onChange={(e) =>
-          setForm({ ...form, email: e.target.value })
-        }
-      />
+          <input
+            className="input mt-md"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, email: e.target.value }))
+            }
+          />
 
-      <input
-        className="input mt-md"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={(e) =>
-          setForm({ ...form, password: e.target.value })
-        }
-      />
+          <input
+            className="input mt-md"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, password: e.target.value }))
+            }
+          />
 
-      {/* (optional) keep extra fields, they will be stored too */}
-      {/* 
-      <input ... first_name />
-      <input ... last_name />
-      <input ... mobile />
-      <input ... passport_id />
-      */}
+          {error && <div className="error-text mt-sm">{error}</div>}
 
-      {error && (
-        <div
-          style={{
-            marginTop: "0.75rem",
-            color: "#b91c1c",
-            fontSize: "0.9rem",
-          }}
-        >
-          {error}
+          <button className="btn-primary mt-lg" disabled={loading}>
+            {loading ? "Creating..." : "Create Account"}
+          </button>
+        </form>
+
+        <div className="mt-md auth-footer-text">
+          Already have an account?{" "}
+          <Link to="/login" className="link">
+            Login
+          </Link>
         </div>
-      )}
-
-      <button className="btn-primary mt-md" onClick={onSubmit}>
-        Create Account
-      </button>
-
-      <div
-        style={{
-          marginTop: "1rem",
-          fontSize: "0.9rem",
-          textAlign: "center",
-        }}
-      >
-        Already have an account?{" "}
-        <Link to="/login" style={{ color: "#4f46e5" }}>
-          Login
-        </Link>
       </div>
     </div>
   );

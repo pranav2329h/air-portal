@@ -1,75 +1,43 @@
-import { format, differenceInMinutes } from "date-fns";
+// src/components/FlightCard.jsx
+import { format } from "date-fns";
 
 export default function FlightCard({ flight, onSelect }) {
-  const depDate = new Date(flight.departure_time);
-  const arrDate = new Date(flight.arrival_time);
+  const dep = format(new Date(flight.departure_time), "dd MMM, HH:mm");
+  const arr = format(new Date(flight.arrival_time), "dd MMM, HH:mm");
 
-  const dep = format(depDate, "dd MMM, HH:mm");
-  const arr = format(arrDate, "dd MMM, HH:mm");
-
-  const durationMin = differenceInMinutes(arrDate, depDate);
-  const hours = Math.floor(durationMin / 60);
-  const minutes = durationMin % 60;
-  const durationLabel = `${hours}h ${minutes}m`;
-
-  const computePrice = (fare) => {
-    const base = Number(flight.base_price || 0);
-    const mult = Number(fare.multiplier || 1);
-    return Math.round(base * mult).toLocaleString("en-IN");
-  };
+  const base = Number(flight.base_price || 0);
 
   return (
     <div className="flight-card">
-      {/* Left side */}
       <div className="flight-main">
-        <div className="flight-airline">
-          <span className="airline-name">{flight.airline.name}</span>
-          <span className="flight-number">
-            {flight.airline.code}-{flight.flight_number}
-          </span>
+        <div className="flight-title">
+          {flight.airline.name} • {flight.flight_number} • {flight.aircraft}
         </div>
-
         <div className="flight-route">
-          <div className="airport">
-            <div className="airport-code">{flight.source.code}</div>
-            <div className="airport-city">{flight.source.city}</div>
-            <div className="airport-time">{dep}</div>
-          </div>
-
-          <div className="route-center">
-            <div className="route-line" />
-            <div className="route-duration">{durationLabel}</div>
-          </div>
-
-          <div className="airport">
-            <div className="airport-code">{flight.destination.code}</div>
-            <div className="airport-city">{flight.destination.city}</div>
-            <div className="airport-time">{arr}</div>
-          </div>
+          {flight.source.code} → {flight.destination.code}
         </div>
-
-        <div className="flight-meta">
-          <span>{flight.aircraft}</span>
+        <div className="flight-times">
+          {dep} → {arr}
         </div>
       </div>
 
-      {/* Right side: fares */}
-      <div className="flight-fares">
-        {flight.fares.map((fare) => (
-          <button
-            key={fare.id}
-            className="fare-card"
-            onClick={() => onSelect({ flight, fare })}
-          >
-            <div className="fare-class">{fare.cabin_class}</div>
-            <div className="fare-price">₹ {computePrice(fare)}</div>
-            <div className="fare-seats">
-              {fare.seats_available > 5
-                ? `${fare.seats_available} seats left`
-                : `Only ${fare.seats_available} left`}
-            </div>
-          </button>
-        ))}
+      <div className="fares-row">
+        {flight.fares.map((fare) => {
+          const price = base * Number(fare.multiplier || 1);
+          return (
+            <button
+              key={fare.id}
+              className="fare-chip"
+              onClick={() => onSelect({ flight, fare })}
+            >
+              <div className="fare-chip-class">{fare.cabin_class}</div>
+              <div className="fare-chip-price">₹{price.toFixed(0)}</div>
+              <div className="fare-chip-meta">
+                {fare.seats_available} seats left
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

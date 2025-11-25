@@ -1,11 +1,7 @@
+// src/api/flights.js
 import http from "./http";
 
-export const searchFlights = (params) =>
-  // params can be {}, or { source, destination, date }
+// Get flights (filters optional)
+// params: { source, destination, date }
+export const searchFlights = (params = {}) =>
   http.get("/flights/search/", { params });
-
-export const checkCoupon = (code) =>
-  http.get(`/flights/coupon/${code}/`);
-
-export const getAirports = () =>
-  http.get("/flights/airports/");

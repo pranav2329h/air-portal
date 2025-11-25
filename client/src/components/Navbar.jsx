@@ -1,10 +1,19 @@
-import { Link } from "react-router-dom";
+// src/components/Navbar.jsx
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
 
 export default function Navbar() {
   const user = useSelector((s) => s.auth.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  if (!user) return null;
+
+  const onLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
 
   return (
     <nav className="navbar">
@@ -14,38 +23,18 @@ export default function Navbar() {
         </Link>
 
         <div className="navbar-links">
-          {user && (
-            <>
-              <span className="nav-link">
-                👤 {user.first_name || user.username}
-              </span>
-              <Link className="nav-link" to="/search">
-                Search Flights
-              </Link>
-              <Link className="nav-link" to="/bookings">
-                My Bookings
-              </Link>
-              <Link className="nav-link" to="/profile">
-                Profile
-              </Link>
-              <button
-                className="nav-btn secondary"
-                onClick={() => dispatch(logout())}
-              >
-                Logout
-              </button>
-            </>
-          )}
-          {!user && (
-            <>
-              <Link className="nav-link" to="/login">
-                Login
-              </Link>
-              <Link to="/register">
-                <button className="nav-btn">Sign Up</button>
-              </Link>
-            </>
-          )}
+          <Link className="nav-link" to="/home">
+            Search
+          </Link>
+          <Link className="nav-link" to="/bookings">
+            My Bookings
+          </Link>
+          <Link className="nav-link" to="/profile">
+            Profile
+          </Link>
+          <button className="nav-btn secondary" onClick={onLogout}>
+            Logout
+          </button>
         </div>
       </div>
     </nav>

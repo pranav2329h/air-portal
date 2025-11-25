@@ -1,175 +1,98 @@
+// src/pages/Checkout.jsx
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { createBooking } from "../api/bookings";
-import { makePayment } from "../api/payments";
-import { checkCoupon } from "../api/flights";
 
 export default function Checkout() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const user = useSelector((s) => s.auth.user);
 
-  const [passengers, setPassengers] = useState([
-    { first_name: "", last_name: "", age: 18, passport_id: "" },
-  ]);
+  if (!state || !state.flight || !state.fare) {
+    navigate("/home");
+  }
 
-  const [coupon, setCoupon] = useState("");
-  const [couponInfo, setCouponInfo] = useState(null);
+  const { flight, fare } = state || {};
+  const base = Number(flight.base_price || 0);
+  const price = base * Number(fare.multiplier || 1);
 
-  const [booking, setBooking] = useState(null);
+  const [passenger, setPassenger] = useState({
+    first_name: "",
+    last_name: "",
+    age: "",
+    passport_id: "",
+  });
 
-  if (!state) return <div className="app-container">Invalid navigation.</div>;
-
-  const { flight, fare } = state;
-
-  const addPassenger = () => {
-    setPassengers((prev) => [
-      ...prev,
-      { first_name: "", last_name: "", age: 18, passport_id: "" },
-    ]);
-  };
-
-  const verifyCoupon = async () => {
-    try {
-      const res = await checkCoupon(coupon);
-      setCouponInfo(res.data);
-    } catch {
-      setCouponInfo(null);
-    }
-  };
-
-  const handleBooking = async () => {
-    const payload = {
-      flight: flight.id,
-      cabin_class: fare.cabin_class,
-      passengers,
-      coupon_code: coupon || "",
-    };
-
-    const res = await createBooking(payload);
-    setBooking(res.data);
-  };
-
-  const handlePayment = async () => {
-    await makePayment(booking.id);
-    alert(`Booking confirmed! PNR: ${booking.pnr}`);
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await createBooking({
+      userId: user.id,
+      flight,
+      fare,
+      passengers: [passenger],
+      totalPrice: price,
+    });
     navigate("/bookings");
   };
 
   return (
     <div className="app-container">
-      {/* Flight Summary */}
+      <h2 className="page-title">Checkout</h2>
+
       <div className="card">
-        <div className="section-title">Review</div>
-        <div>
-          {flight.airline.name} {flight.flight_number} — {fare.cabin_class}
-        </div>
-        <div className="badge mt-md">Flight ID: {flight.id}</div>
-      </div>
+        <h3 className="card-title">
+          {flight.airline.name} {flight.flight_number} – {flight.source.code} →{" "}
+          {flight.destination.code}
+        </h3>
+        <p className="card-subtitle">
+          Cabin: {fare.cabin_class} • Price: ₹{price.toFixed(0)}
+        </p>
 
-      {/* Passenger Info */}
-      <div className="card section">
-        <div className="section-title">Passenger Details</div>
-
-        {passengers.map((p, index) => (
-          <div key={index} className="passenger-row">
+        <form className="mt-md" onSubmit={onSubmit}>
+          <div className="grid grid-2">
             <input
               className="input"
               placeholder="First Name"
-              value={p.first_name}
+              value={passenger.first_name}
               onChange={(e) =>
-                setPassengers((arr) => {
-                  arr = [...arr];
-                  arr[index].first_name = e.target.value;
-                  return arr;
-                })
+                setPassenger((p) => ({ ...p, first_name: e.target.value }))
               }
             />
             <input
               className="input"
               placeholder="Last Name"
-              value={p.last_name}
+              value={passenger.last_name}
               onChange={(e) =>
-                setPassengers((arr) => {
-                  arr = [...arr];
-                  arr[index].last_name = e.target.value;
-                  return arr;
-                })
+                setPassenger((p) => ({ ...p, last_name: e.target.value }))
               }
             />
+          </div>
+
+          <div className="grid grid-2 mt-md">
             <input
               className="input"
-              type="number"
               placeholder="Age"
-              value={p.age}
+              value={passenger.age}
               onChange={(e) =>
-                setPassengers((arr) => {
-                  arr = [...arr];
-                  arr[index].age = e.target.value;
-                  return arr;
-                })
+                setPassenger((p) => ({ ...p, age: e.target.value }))
               }
             />
             <input
               className="input"
               placeholder="Passport ID"
-              value={p.passport_id}
+              value={passenger.passport_id}
               onChange={(e) =>
-                setPassengers((arr) => {
-                  arr = [...arr];
-                  arr[index].passport_id = e.target.value;
-                  return arr;
-                })
+                setPassenger((p) => ({ ...p, passport_id: e.target.value }))
               }
             />
           </div>
-        ))}
 
-        <button className="btn-ghost mt-md" onClick={addPassenger}>
-          + Add Passenger
-        </button>
-      </div>
-
-      {/* Coupon */}
-      <div className="card section">
-        <div className="section-title">Apply Coupon</div>
-
-        <div className="passenger-row">
-          <input
-            className="input"
-            placeholder="Coupon Code"
-            value={coupon}
-            onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-          />
-          <button className="btn-primary" onClick={verifyCoupon}>
-            Verify
+          <button className="btn-primary mt-lg" type="submit">
+            Confirm Booking
           </button>
-        </div>
-
-        {couponInfo && (
-          <div className="badge mt-md">
-            Valid Coupon: {couponInfo.discount_percent}% off
-          </div>
-        )}
+        </form>
       </div>
-
-      {/* Book Button */}
-      {!booking && (
-        <button className="btn-primary mt-lg" onClick={handleBooking}>
-          Book Flight
-        </button>
-      )}
-
-      {/* Payment */}
-      {booking && (
-        <div className="card section">
-          <div className="section-title">Booking Created</div>
-          <div className="badge">PNR: {booking.pnr}</div>
-
-          <button className="btn-primary mt-md" onClick={handlePayment}>
-            Pay & Confirm
-          </button>
-        </div>
-      )}
     </div>
   );
 }

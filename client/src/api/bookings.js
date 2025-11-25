@@ -1,7 +1,34 @@
-import http from "./http";
+// src/api/bookings.js
 
-export const createBooking = (data) =>
-  http.post("/bookings/create/", data);
+const BOOKINGS_KEY = "airportal_bookings";
 
-export const myBookings = () =>
-  http.get("/bookings/");
+function loadBookings() {
+  try {
+    return JSON.parse(localStorage.getItem(BOOKINGS_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveBookings(bookings) {
+  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
+}
+
+// Create booking for a user
+export async function createBooking(booking) {
+  const bookings = loadBookings();
+  const newBooking = {
+    id: Date.now(),
+    created_at: new Date().toISOString(),
+    ...booking,
+  };
+  bookings.push(newBooking);
+  saveBookings(bookings);
+  return { data: newBooking };
+}
+
+// List bookings for one user
+export async function listBookings(userId) {
+  const bookings = loadBookings().filter((b) => b.userId === userId);
+  return { data: bookings };
+}

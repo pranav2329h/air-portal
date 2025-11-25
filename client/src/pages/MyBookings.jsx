@@ -1,50 +1,42 @@
+// src/pages/MyBookings.jsx
 import { useEffect, useState } from "react";
-import { myBookings } from "../api/bookings";
+import { useSelector } from "react-redux";
+import { listBookings } from "../api/bookings";
 
 export default function MyBookings() {
-  const [items, setItems] = useState([]);
+  const user = useSelector((s) => s.auth.user);
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
-    myBookings().then((res) => setItems(res.data));
-  }, []);
+    async function load() {
+      const res = await listBookings(user.id);
+      setBookings(res.data);
+    }
+    if (user) load();
+  }, [user]);
 
   return (
     <div className="app-container">
       <h2 className="page-title">My Bookings</h2>
 
-      {items.length === 0 && (
-        <div className="card mt-md">
-          <p className="page-subtitle">You have no bookings yet.</p>
+      {bookings.length === 0 ? (
+        <p className="page-subtitle">No bookings yet.</p>
+      ) : (
+        <div className="flights-list">
+          {bookings.map((b) => (
+            <div key={b.id} className="card">
+              <h3 className="card-title">
+                {b.flight.airline.name} {b.flight.flight_number} –{" "}
+                {b.flight.source.code} → {b.flight.destination.code}
+              </h3>
+              <p className="card-subtitle">
+                {b.fare.cabin_class} • ₹{Number(b.totalPrice).toFixed(0)} •{" "}
+                {b.passengers[0]?.first_name} {b.passengers[0]?.last_name}
+              </p>
+            </div>
+          ))}
         </div>
       )}
-
-      {items.map((booking) => (
-        <div key={booking.id} className="card mt-md">
-          <div className="section-title">PNR: {booking.pnr}</div>
-
-          <div className="page-subtitle">
-            {booking.flight.airline.name} {booking.flight.flight_number} •{" "}
-            {booking.cabin_class}
-          </div>
-
-          <div className="mt-md">
-            <strong>Passengers:</strong>
-            <div>
-              {booking.passengers.map((p) => (
-                <div key={p.id}>
-                  {p.first_name} {p.last_name} ({p.age})
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-md">
-            <strong>Total Paid:</strong> ₹{booking.price_total}
-          </div>
-
-          <div className="mt-md badge">{booking.status}</div>
-        </div>
-      ))}
     </div>
   );
 }

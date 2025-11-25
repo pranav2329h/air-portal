@@ -1,8 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+// src/App.jsx
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -11,7 +14,6 @@ import Checkout from "./pages/Checkout";
 import MyBookings from "./pages/MyBookings";
 import Profile from "./pages/Profile";
 
-import ProtectedRoute from "./components/ProtectedRoute";
 import { loadUserFromStorage } from "./store/authSlice";
 
 export default function App() {
@@ -23,15 +25,16 @@ export default function App() {
   }, [dispatch]);
 
   return (
-    <BrowserRouter>
-      {/* Show Navbar only when user is logged in */}
+    <>
       {user && <Navbar />}
 
       <Routes>
-        {/* DEFAULT → LOGIN PAGE */}
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route
+          path="/"
+          element={<Navigate to={user ? "/home" : "/login"} replace />}
+        />
 
-        {/* AUTH PAGES */}
+        {/* Auth */}
         <Route
           path="/login"
           element={user ? <Navigate to="/home" /> : <Login />}
@@ -41,7 +44,7 @@ export default function App() {
           element={user ? <Navigate to="/home" /> : <Register />}
         />
 
-        {/* MAIN PAGES */}
+        {/* Main pages */}
         <Route
           path="/home"
           element={
@@ -87,6 +90,6 @@ export default function App() {
           }
         />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
