@@ -1,9 +1,11 @@
 import http from "./http";
 
-// Search flights
 export const searchFlights = (params) =>
-  http.get("/api/flights/search/", { params });
+  // params can be {}, or { source, destination, date }
+  http.get("/flights/search/", { params });
 
 export const checkCoupon = (code) =>
-  http.get(`/api/flights/coupon/${code}/`);
+  http.get(`/flights/coupon/${code}/`);
 
+export const getAirports = () =>
+  http.get("/flights/airports/");

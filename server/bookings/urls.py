@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import BookingCreateView, MyBookingsView
+from .views import BookingCreateView, BookingListView
 
 urlpatterns = [
-    path("", MyBookingsView.as_view()),      # GET: my bookings
-    path("create/", BookingCreateView.as_view()),  # POST
+    path("", BookingListView.as_view()),          # GET → user bookings
+    path("create/", BookingCreateView.as_view()), # POST → create booking
 ]

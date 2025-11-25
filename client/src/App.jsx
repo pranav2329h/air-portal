@@ -12,38 +12,36 @@ import MyBookings from "./pages/MyBookings";
 import Profile from "./pages/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import { setUser } from "./store/authSlice";
+import { loadUserFromStorage } from "./store/authSlice";
 
 export default function App() {
   const dispatch = useDispatch();
   const user = useSelector((s) => s.auth.user);
 
-  // Hydrate from localStorage
   useEffect(() => {
-    const raw = localStorage.getItem("currentUser");
-    if (raw) {
-      try {
-        dispatch(setUser(JSON.parse(raw)));
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    dispatch(loadUserFromStorage());
   }, [dispatch]);
 
   return (
     <BrowserRouter>
+      {/* Show Navbar only when user is logged in */}
       {user && <Navbar />}
 
       <Routes>
-        {/* Default → login */}
+        {/* DEFAULT → LOGIN PAGE */}
         <Route path="/" element={<Navigate to="/login" />} />
 
+        {/* AUTH PAGES */}
         <Route
           path="/login"
           element={user ? <Navigate to="/home" /> : <Login />}
         />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/home" /> : <Register />}
+        />
 
+        {/* MAIN PAGES */}
         <Route
           path="/home"
           element={

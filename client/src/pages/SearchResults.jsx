@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { searchFlights } from "../api/flights";
 import FlightCard from "../components/FlightCard";
 
@@ -9,53 +9,66 @@ export default function SearchResults() {
 
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
+  const hasParams =
+    params.source && params.destination && params.date;
 
   useEffect(() => {
-    // Ensure the required params exist
-    if (!params.source || !params.destination || !params.date) {
-      console.warn("Missing search params:", params);
-      setFlights([]);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
+    setError(null);
 
-    searchFlights(params)
-      .then((res) => {
-        setFlights(res.data);
-      })
+    const query = hasParams ? params : {};
+
+    searchFlights(query)
+      .then((res) => setFlights(res.data))
       .catch((err) => {
-        console.error("Flight search error:", err);
-        setFlights([]);
+        console.error(err);
+        setError("Failed to load flights. Please try again.");
       })
       .finally(() => setLoading(false));
-  }, [search]); // THIS IS OK NOW
+  }, [search]);
 
-  const onSelect = ({ flight, fare }) => {
-    navigate("/checkout", { state: { flight, fare } });
-  };
+  const title = hasParams
+    ? `Flights ${params.source} → ${params.destination} on ${params.date}`
+    : "All Available Flights";
 
   return (
     <div className="app-container">
-      <h2 className="page-title" style={{ fontSize: "1.5rem" }}>
-        Search Results
-      </h2>
+      <h2 className="page-title">{title}</h2>
 
-      {loading ? (
-        <p>Loading flights...</p>
-      ) : flights.length > 0 ? (
-        <div className="flights-list">
-          {flights.map((f) => (
-            <FlightCard key={f.id} flight={f} onSelect={onSelect} />
-          ))}
-        </div>
-      ) : (
+      {loading && (
         <div className="card">
-          <p className="page-subtitle">No flights available for this search.</p>
+          <p>Loading flights...</p>
         </div>
       )}
+
+      {error && (
+        <div className="card error-card">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && flights.length === 0 && (
+        <div className="card">
+          <p>No flights available for this search.</p>
+        </div>
+      )}
+
+      <div className="flights-list">
+        {flights.map((f) => (
+          <FlightCard
+            key={f.id}
+            flight={f}
+            onSelect={({ flight, fare }) =>
+              // parent Checkout logic stays same
+              window.location.assign(
+                `/checkout?flight=${flight.id}&fare=${fare.id}`
+              )
+            }
+          />
+        ))}
+      </div>
     </div>
   );
 }
