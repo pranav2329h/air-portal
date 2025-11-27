@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from datetime import timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 # ------------------------------------
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # Must be FIRST
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -118,15 +117,14 @@ USE_TZ = False
 # STATIC FILES
 # ------------------------------------
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"  # good for production
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # ------------------------------------
 # REST FRAMEWORK CONFIG
 # ------------------------------------
+# FIXED: AllowAny removed from authentication classes
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [],  # frontend-only auth
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],

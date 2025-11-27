@@ -1,4 +1,17 @@
 /* ===== Global Reset ===== */
+/* FIX: Make fare buttons visible */
+.fare-chip {
+  background: linear-gradient(to bottom right, #f97316, #fb923c) !important;
+  color: #1e293b !important;
+  border: none !important;
+  font-weight: 600;
+}
+
+.fare-chip:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 28px rgba(249, 115, 22, 0.45);
+}
+
 *,
 *::before,
 *::after {

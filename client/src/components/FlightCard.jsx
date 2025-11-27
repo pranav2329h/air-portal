@@ -4,7 +4,6 @@ import { format } from "date-fns";
 export default function FlightCard({ flight, onSelect }) {
   const dep = format(new Date(flight.departure_time), "dd MMM, HH:mm");
   const arr = format(new Date(flight.arrival_time), "dd MMM, HH:mm");
-
   const base = Number(flight.base_price || 0);
 
   return (
@@ -13,9 +12,11 @@ export default function FlightCard({ flight, onSelect }) {
         <div className="flight-title">
           {flight.airline.name} • {flight.flight_number} • {flight.aircraft}
         </div>
+
         <div className="flight-route">
           {flight.source.code} → {flight.destination.code}
         </div>
+
         <div className="flight-times">
           {dep} → {arr}
         </div>
@@ -23,10 +24,13 @@ export default function FlightCard({ flight, onSelect }) {
 
       <div className="fares-row">
         {flight.fares.map((fare) => {
-          const price = base * Number(fare.multiplier || 1);
+          const multiplier = Number(fare.multiplier || 1);
+          const price = base * multiplier;
+
           return (
             <button
               key={fare.id}
+              type="button"
               className="fare-chip"
               onClick={() => onSelect({ flight, fare })}
             >

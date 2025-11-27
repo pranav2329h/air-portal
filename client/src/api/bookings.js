@@ -1,5 +1,3 @@
-// src/api/bookings.js
-
 const BOOKINGS_KEY = "airportal_bookings";
 
 function loadBookings() {
@@ -13,8 +11,6 @@ function loadBookings() {
 function saveBookings(bookings) {
   localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
 }
-
-// Create booking for a user
 export async function createBooking(booking) {
   const bookings = loadBookings();
   const newBooking = {
